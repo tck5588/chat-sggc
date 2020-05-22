@@ -28,20 +28,24 @@ io.on('connection', (client) => {
         usuarios.agregarPersona(client.id, data.nombre, data.sala);
 
         //LISTA DE PERSONAS CUANDO UN USUARIO SE LOGEA
-        client.broadcast.to(data.sala).emit('listarPersonas', usuarios.getPersonasPorSAla(data.sala));
-
+        client.broadcast.to(data.sala).emit('listaPersona', usuarios.getPersonasPorSAla(data.sala));
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${data.nombre} se unio`));
 
         callback(usuarios.getPersonasPorSAla(data.sala));
     });
 
     //CREACION DE MENSAJE DE PERSONA
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
         let persona = usuarios.getPersona(client.id);
 
         let mensaje = crearMensaje(persona.nombre, data.mensaje);
 
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+
+
+        callback(mensaje)
 
     })
 
@@ -52,7 +56,7 @@ io.on('connection', (client) => {
 
         client.broadcast.to(personaBorrada.sala).emit('crearMensaje', crearMensaje('Administrador', `${personaBorrada.nombre} abando el chat`));
 
-        client.broadcast.to(personaBorrada.sala).emit('listarPersonas', usuarios.getPersonasPorSAla(personaBorrada.sala));
+        client.broadcast.to(personaBorrada.sala).emit('listaPersona', usuarios.getPersonasPorSAla(personaBorrada.sala));
 
     });
 
